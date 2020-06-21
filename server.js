@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const { urlencoded } = require('express');
 
 //database
-mongoose.connect('mongodb+srv://amaljith:amaljith@redditclone-sx0tw.mongodb.net/test1?retryWrites=true&w=majority',
+mongoose.connect('mongodb+srv://amaljith:amaljith@redditclone-sx0tw.mongodb.net/test0?retryWrites=true&w=majority',
     { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => { console.log('Database Connection Established...')})
     .catch(err => console.error(err));
