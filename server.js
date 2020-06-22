@@ -2,10 +2,10 @@ const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
 const { urlencoded } = require('express');
+require('dotenv/config');
 
 //database
-mongoose.connect('mongodb+srv://amaljith:amaljith@redditclone-sx0tw.mongodb.net/test0?retryWrites=true&w=majority',
-    { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(process.env.DB_connection,{ useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => { console.log('Database Connection Established...')})
     .catch(err => console.error(err));
 
