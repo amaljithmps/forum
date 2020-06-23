@@ -3,9 +3,10 @@ const app = express();
 const mongoose = require('mongoose');
 const { urlencoded } = require('express');
 require('dotenv/config');
+const bodyParser = require('body-parser');
 
 //database
-mongoose.connect(process.env.DB_connection,{ useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(process.env.DB_connection,{ useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false })
     .then(() => { console.log('Database Connection Established...')})
     .catch(err => console.error(err));
 
@@ -13,6 +14,7 @@ mongoose.connect(process.env.DB_connection,{ useNewUrlParser: true, useUnifiedTo
 
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
+app.use(bodyParser.json());
 
 //start server
 app.listen(process.env.PORT || 3300, () => console.log("Server Connection Established"));

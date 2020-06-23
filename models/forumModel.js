@@ -1,23 +1,13 @@
 const mongoose = require('mongoose');
 
 const commentSchema = new mongoose.Schema({
-    author: {
+    commentAuthor: {
         type: String,
         required: true
     },
-    message: {
+    commentMessage: {
         type: String,
         required: true
-    },
-    upvotes: {
-        type: Number,
-        default: 0,
-        min: 0
-    },
-    downvotes: {
-        type: Number,
-        default: 0,
-        min: 0
     }
 },{
     timestamps: true
@@ -29,6 +19,10 @@ const forumSchema = new mongoose.Schema({
         required: true
     },
     message: {
+        type: String,
+        required: true
+    },
+    community: {
         type: String,
         required: true
     },

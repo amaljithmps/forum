@@ -1,13 +1,18 @@
+const { $where } = require("../models/forumModel");
+
   
 module.exports = (app, ForumModel) => {
-
+    ////////////
+    //Posts
+    ////////////
     //create post
     app.post('/new', (req, res) => {
         try {
 
             let entry = new ForumModel({
                 author: req.body.author,
-                message: req.body.message
+                message: req.body.message,
+                community: req.body.community
             });
 
             entry.save().then(() => {
@@ -28,7 +33,7 @@ module.exports = (app, ForumModel) => {
     });
 
     //get all post
-    app.get('/posts', (req, res) => {
+    app.get('/all', (req, res) => {
         try {
             
             ForumModel.find().then((resp) => {
@@ -49,9 +54,9 @@ module.exports = (app, ForumModel) => {
     });
 
      //get one post
-     app.get('/posts/:id', (req, res) => {
+     app.get('/posts', (req, res) => {
         try {
-            ForumModel.findById(req.params._id).then((resp) => {
+            ForumModel.findById(req.body.f_id).then((resp) => {
                 if(resp != null){
                     return res.status(200).json({
                         success: true,
@@ -77,10 +82,145 @@ module.exports = (app, ForumModel) => {
         }
     });
 
-    //delete one post
-    app.delete('/posts/:id', (req, res) => {
+     //get all posts from one community
+    app.get('/community/posts', (req, res) => {
         try {
-            ForumModel.findById(req.params._id).then((resp) => {
+            let query = {community: req.body.community }
+            ForumModel.find(query).then((resp) => {
+                if(resp != null){
+                    return res.status(200).json({
+                        success: true,
+                        message: resp
+                    });
+                }
+                else{
+                    return res.status(404).json({
+                        success: false,
+                        message: 'No Posts'
+                    });
+                }
+                
+            }).catch((e) => {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Community does not Exist!'
+                });
+            });
+
+        } catch (error) {
+            res.send(error);
+        }
+    });
+
+    //update a post
+    app.patch('/update', (req, res) => {
+        try {
+            let query = {_id: req.body.f_id};
+            let newData = {$set:{message:req.body.message}}
+            ForumModel.updateOne(query,newData).then((resp) => {
+                return res.status(200).json({
+                    success: true,
+                    message: resp
+                });
+            }).catch((e) => {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Post does not Exist!'
+                });
+            });
+
+        } catch (error) {
+            res.send(error);
+        }
+    });
+
+    //delete one post
+    app.delete('/delete', (req, res) => {
+        try {
+            let query = {_id: req.body.f_id};
+            ForumModel.deleteOne(query, () => {
+                return res.status(200).json({
+                    success: true,
+                    message: 'Post deleted'
+                });
+            }).catch((err) => {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Post does not Exist!'
+                });
+            });
+
+        } catch (error) {
+            res.send(error);
+        }
+    });
+
+
+    //comments
+    //new comment
+    app.post('/comment/new', (req, res) => {
+        try {
+            let query = {_id: req.body.f_id};
+            let newComment = {$push:{comments:{commentAuthor: req.body.cauthor,commentMessage: req.body.cmessage}}};
+            ForumModel.findById(query).then((resp) => {
+                if(resp != null){
+                    ForumModel.updateOne(query,newComment).then((resp) => {
+                        return res.status(200).json({
+                            success: true,
+                            message: resp
+                        });
+                    }).catch((err) => {
+                        return res.status(500).json({
+                            message: 'Operation Failed'});
+                    });
+                }
+                else{
+                    return res.status(404).json({
+                        success: false,
+                        message: 'Post not found'
+                    });
+                }
+                
+            }).catch((err) => {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Post does not Exist!'
+                });
+            });
+
+        } catch (error) {
+            res.send(error);
+        }
+    });
+
+    //upVotes on post
+    app.patch('/upvote', (req, res) => {
+        try {
+            let query = {_id: req.body.f_id};
+            let upData = {$inc:{upvotes:1}}
+            ForumModel.updateOne(query,upData).then((resp) => {
+                return res.status(200).json({
+                    success: true,
+                    message: resp
+                });
+            }).catch((e) => {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Post does not Exist!'
+                });
+            });
+
+        } catch (error) {
+            res.send(error);
+        }
+    });
+
+     //downVotes on post
+     app.patch('/downvote', (req, res) => {
+        try {
+            let query = {_id: req.body.f_id};
+            let downData = {$inc:{downvotes:1}}
+            ForumModel.updateOne(query,downData).then((resp) => {
                 return res.status(200).json({
                     success: true,
                     message: resp
