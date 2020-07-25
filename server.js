@@ -17,8 +17,7 @@ app.use(express.json());
 app.use(bodyParser.json());
 
 //start server
-app.listen(process.env.PORT || 3300, () => console.log("Server Connection Established"));
-console.log(process.env.PORT);
+app.listen(process.env.PORT || 3000, () => console.log("Server Connection Established"));
 
 //models
 const ForumModel = require('./models/forumModel');
