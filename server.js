@@ -6,6 +6,9 @@ require('dotenv/config');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
+const session = require('express-session');
+const FileStore = require('session-file-store')(session)
+
 
 //database
 mongoose.connect(process.env.DB_connection,{ useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false })
@@ -18,7 +21,14 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(bodyParser.json());
-app.use(cookieParser('12345-67890-09876-54321'));
+//app.use(cookieParser('1672345-890-09876-54321'));
+app.use(session({
+    name: 'session-id',
+    secret: '1672345-890-09876-54321',
+    saveUninitialized: false,
+    resave: false,
+    store: new FileStore()
+}));
 
 //start server
 app.listen(process.env.PORT || 3000, () => console.log("Server Connection Established"));
@@ -26,8 +36,8 @@ app.listen(process.env.PORT || 3000, () => console.log("Server Connection Establ
 
 //authorization
 function auth(req, res, next){
-    console.log(req.signedCookies);
-    if(!req.signedCookies.user){
+    console.log(req.session);
+    if(!req.session.user){
         var authHeader = req.headers.authorization;
         if (!authHeader) {
             var err = new Error('You are not authenticated!');
@@ -40,7 +50,7 @@ function auth(req, res, next){
             var password = auth[1];
             
             if(username === 'admin' && password === 'password') {
-                res.cookie('user', 'admin', { signed: true });
+                req.session.user = 'admin';
                 next();
             } else {
                 var err = new Error('You are not authenticated!');
@@ -50,7 +60,7 @@ function auth(req, res, next){
             }
         }
     } else {
-        if(req.signedCookies.user === 'admin') {
+        if(req.session.user === 'admin') {
             next();
         } else {
             var err = new Error('You are not authenticated!');
