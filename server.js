@@ -7,6 +7,11 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const session = require('express-session');
 const FileStore = require('session-file-store')(session);
+const passport = require('passport');
+
+
+const authenticate = require('./authenticate');
+
 
 
 //database
@@ -23,34 +28,37 @@ app.use(bodyParser.json());
 
 const indexRouter = require('./controllers/index');
 const userRouter = require('./controllers/user');
-app.use('/',indexRouter);
-app.use('/users',userRouter);
+
 
 //start server
 app.listen(process.env.PORT || 3000, () => console.log("Server Connection Established"));
 
 
 //app.use(cookieParser('12345-67890-09876-54321'));
+app.use(session({
+  name: 'session-id',
+  secret: '12345-67890-09876-54321',
+  saveUninitialized: false,
+  resave: false,
+  store: new FileStore()
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+
+app.use('/',indexRouter);
+app.use('/users',userRouter);
 
 //authorization
-
-
 function auth (req, res, next) {
-    console.log(req.session);
-  if(!req.session.user) {
+    if(!req.user) {
       var err = new Error('You are not authenticated!');
       err.status = 403;
       return next(err);
   }
-  else {
-    if (req.session.user === 'authenticated') {
-      next();
-    }
-    else {
-      var err = new Error('You are not authenticated!');
-      err.status = 403;
-      return next(err);
-    }
+  else{
+    next();
   }
 }
 
