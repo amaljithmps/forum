@@ -7,15 +7,8 @@ var User = require('../models/user');
 var router = express.Router();
 router.use(bodyParser.json());
 const passport = require('passport');
+const authenticate = require('../authenticate');
 
-
-router.use(session({
-    name: 'session-id',
-    secret: '12345-67890-09876-54321',
-    saveUninitialized: false,
-    resave: false,
-    store: new FileStore()
-}));
 
 router.post('/signup', (req, res, next) => {
     User.register(new User({ username: req.body.username }), req.body.password, (err, user) => {
@@ -36,9 +29,11 @@ router.post('/signup', (req, res, next) => {
 
 
 router.post('/login', passport.authenticate('local'), (req, res, next) => {
+	var token = authenticate.getToken({ _id: req.user._id });
+
 	res.statusCode= 200;
 	res.setHeader('Content-Type','applircation/json');
-	res.json({ success: true, status: 'Login Successfull'});
+	res.json({ success: true, token: token, status: 'Login Successfull'});
   });
   
   router.get('/logout', (req, res) => {
