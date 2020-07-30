@@ -1,12 +1,13 @@
 const { $where } = require("../models/forumModel");
 const authenticate = require('../authenticate');
-  
+const cors = require('./cors');
+
 module.exports = (app, ForumModel) => {
     ////////////
     //Posts
     ////////////
     //create post
-    app.post('/new', authenticate.verifyUser, (req, res) => {
+    app.post('/new', cors.corsWithOptions, authenticate.verifyUser, (req, res) => {
         try {
 
             let entry = new ForumModel({
@@ -32,7 +33,7 @@ module.exports = (app, ForumModel) => {
     });
 
     //get all post
-    app.get('/all', (req, res) => {
+    app.get('/all', cors.cors, (req, res) => {
         try {
             
             ForumModel.find().populate('author').populate('comments.author').then((resp) => {
@@ -53,7 +54,7 @@ module.exports = (app, ForumModel) => {
     });
 
      //get one post
-     app.get('/posts', (req, res) => {
+     app.get('/posts', cors.cors, (req, res) => {
         try {
             ForumModel.findById(req.body.f_id).populate('author').populate('comments.author').then((resp) => {
                 if(resp != null){
@@ -82,7 +83,7 @@ module.exports = (app, ForumModel) => {
     });
 
      //get all posts from one community
-    app.get('/community', (req, res) => {
+    app.get('/community', cors.cors, (req, res) => {
         try {
             let query = {community: req.body.community }
             ForumModel.find(query).populate('author').populate('comments.author').then((resp) => {
@@ -112,7 +113,7 @@ module.exports = (app, ForumModel) => {
     });
 
     //update a post
-    app.patch('/update', authenticate.verifyUser, (req, res) => {
+    app.patch('/update', cors.corsWithOptions, authenticate.verifyUser, (req, res) => {
         try {
             let query = {_id: req.body.f_id};
             let newData = {$set:{message:req.body.message}}
@@ -134,7 +135,7 @@ module.exports = (app, ForumModel) => {
     });
 
     //delete one post
-    app.delete('/delete', authenticate.verifyUser, (req, res) => {
+    app.delete('/delete', cors.corsWithOptions, authenticate.verifyUser, (req, res) => {
         try {
             let query = {_id: req.body.f_id};
             ForumModel.deleteOne(query, () => {
@@ -157,7 +158,7 @@ module.exports = (app, ForumModel) => {
 
     //comments
     //new comment
-    app.post('/comment', authenticate.verifyUser, (req, res) => {
+    app.post('/comment', cors.corsWithOptions, authenticate.verifyUser, (req, res) => {
         try {
             let query = {_id: req.body.f_id};
             let newComment = {$push:{comments:{commentAuthor: req.user._id, commentMessage: req.body.cmessage}}};
@@ -193,7 +194,7 @@ module.exports = (app, ForumModel) => {
     });
 
     //upVotes on post
-    app.patch('/upvote', authenticate.verifyUser, (req, res) => {
+    app.patch('/upvote', cors.corsWithOptions, authenticate.verifyUser, (req, res) => {
         try {
             let query = {_id: req.body.f_id};
             let upData = {$inc:{upvotes:1}}
@@ -215,7 +216,7 @@ module.exports = (app, ForumModel) => {
     });
 
      //downVotes on post
-     app.patch('/downvote', authenticate.verifyUser, (req, res) => {
+     app.patch('/downvote', cors.corsWithOptions, authenticate.verifyUser, (req, res) => {
         try {
             let query = {_id: req.body.f_id};
             let downData = {$inc:{downvotes:1}}

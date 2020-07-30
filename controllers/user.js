@@ -8,9 +8,9 @@ var router = express.Router();
 router.use(bodyParser.json());
 const passport = require('passport');
 const authenticate = require('../authenticate');
+const cors = require('./cors');
 
-
-router.post('/signup', (req, res, next) => {
+router.post('/signup', cors.corsWithOptions, (req, res, next) => {
     User.register(new User({ username: req.body.username }), req.body.password, (err, user) => {
 		if(err) {
 			res.statusCode= 500;
@@ -42,7 +42,7 @@ router.post('/signup', (req, res, next) => {
 });
 
 
-router.post('/login', passport.authenticate('local'), (req, res, next) => {
+router.post('/login', cors.corsWithOptions, passport.authenticate('local'), (req, res, next) => {
 	var token = authenticate.getToken({ _id: req.user._id });
 
 	res.statusCode= 200;
@@ -50,7 +50,7 @@ router.post('/login', passport.authenticate('local'), (req, res, next) => {
 	res.json({ success: true, token: token, status: 'Login Successfull'});
   });
   
-  router.get('/logout', (req, res) => {
+  router.get('/logout', (req, res, next) => {
     if (req.session) {
       req.session.destroy();
       res.clearCookie('session-id');

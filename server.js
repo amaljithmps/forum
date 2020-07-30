@@ -13,7 +13,11 @@ const config = require('./config');
 const authenticate = require('./authenticate');
 
 //database
-mongoose.connect(process.env.DB_connection,{ useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false })
+mongoose.connect(process.env.DB_connection,{
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useFindAndModify: false,
+  useCreateIndex: true })
     .then(() => { console.log('Database Connection Established...')})
     .catch(err => console.error(err));
 
@@ -40,6 +44,5 @@ app.use(passport.initialize());
 
 app.use('/', userRouter);
 
-app.use(express.static(path.join(__dirname, 'public')));
 forumControl(app, ForumModel);
 app.use('/imageUpload', uploadRouter);
