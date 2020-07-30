@@ -15,8 +15,8 @@ const commentSchema = new mongoose.Schema({
 
 const forumSchema = new mongoose.Schema({
     author: {
-        type: String,
-        required: true
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
     },
     message: {
         type: String,
